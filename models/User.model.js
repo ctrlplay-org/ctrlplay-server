@@ -24,7 +24,7 @@ const userSchema = new Schema(
     games: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Game"
-  }],
+    }],
     isPublisher: Boolean
   },
   {
