@@ -2,6 +2,7 @@
 const router = require('express').Router();
 
 const { isAuthenticated } = require('../middleware/jwt.middleware');
+const Game = require('../models/Game.model');
 // const mongoose = require("mongoose");
 
 const Review = require('../models/Review.model');
@@ -10,7 +11,15 @@ const Review = require('../models/Review.model');
 
 router.post("/reviews", isAuthenticated, (req, res, next) => {
     Review.create(req.body)
-        .then(review => res.status(201).json(review))
+    .then(review => {
+        return Game.findByIdAndUpdate(
+            req.body.game,
+            { $push: { reviews: review._id } },
+            { new: true, useFindAndModify: false }
+        ).then(() => {
+            res.status(201).json(review);
+        });
+    })
         .catch(error => next(error));
 });
 
@@ -58,6 +67,12 @@ router.put("/reviews/:reviewId", isAuthenticated, (req, res, next) => {
 router.delete("/reviews/:reviewId", isAuthenticated, (req, res, next) => {
     const { reviewId } = req.params;
     Review.findByIdAndDelete(reviewId)
+        .then(() => {
+            return Game.findOneAndUpdate(
+                { reviews: reviewId },
+                { $pull: { reviews: reviewId } }
+            );
+        })
         .then(() => res.status(204).send())
         .catch(error => next(error));
 });
