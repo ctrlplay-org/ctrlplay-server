@@ -14,6 +14,7 @@ const gameSchema = new Schema(
       required: [true, "Year created is required."],
     },
     genre: Array,
+    image: String,
     platforms: Array,
     publishers: [{
         type: mongoose.Schema.Types.ObjectId,
