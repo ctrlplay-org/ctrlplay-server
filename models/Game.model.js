@@ -9,9 +9,9 @@ const gameSchema = new Schema(
       required: [true, "Game name is required."],
       trim: true,
     },
-    date: {
-      type: Date,
-      required: [true, "Date created is required."],
+    year: {
+      type: Number,
+      required: [true, "Year created is required."],
     },
     genre: Array,
     platforms: Array,

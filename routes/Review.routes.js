@@ -73,7 +73,7 @@ router.delete("/reviews/:reviewId", isAuthenticated, (req, res, next) => {
                 { $pull: { reviews: reviewId } }
             );
         })
-        .then(() => res.status(204).json( {message: "Review was succesfully deleted!"} ))
+        .then(() => res.status(204).send())
         .catch(error => next(error));
 });
 
