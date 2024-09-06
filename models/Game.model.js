@@ -23,7 +23,8 @@ const gameSchema = new Schema(
     reviews: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Review"
-    }]
+    }],
+    isFeatured: Boolean
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`
