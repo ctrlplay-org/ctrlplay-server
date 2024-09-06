@@ -44,6 +44,16 @@ router.get("/games/publisher/:publisherId", (req, res, next) => {
         .catch(error => next(error));
 });
 
+// GET games if featured is true
+
+router.get("/games/featured", (req, res, next) => {
+    Game.find({ isFeatured: true })
+        .populate("publishers")
+        .populate("reviews")
+        .then((games) => res.json(games))
+        .catch(error => next(error))
+});
+
 // GET game for specific game ID
 
 router.get("/games/:gameId", (req, res, next) => {
@@ -55,15 +65,6 @@ router.get("/games/:gameId", (req, res, next) => {
         .catch(error => next(error));
 });
 
-// GET games if featured is true
-
-router.get("/games/featured", (req, res, next) => {
-    Game.find({isFeatured: true})
-        .populate("publishers")
-        .populate("reviews")
-        .then((games) => res.json(games))
-        .catch(error => next(error))
-});
 
 // UPDATE game for specific game ID
 
