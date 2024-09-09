@@ -8,6 +8,8 @@ const Game = require('../models/Game.model');
 const Review = require('../models/Review.model');
 const User = require('../models/User.model');
 
+const fileUploader = require("../config/cloudinary.config");
+
 // CREATE a new game
 
 router.post("/games", isAuthenticated, (req, res, next) => {
@@ -100,5 +102,20 @@ router.delete("/games/:gameId", isAuthenticated, (req, res, next) => {
         next(error);
     });
 });
+
+// POST image to cloudinary
+
+router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
+   
+    if (!req.file) {
+      next(new Error("No file uploaded!"));
+      return;
+    }
+    
+    // Get the URL of the uploaded file and send it as a response.
+    // 'fileUrl' can be any name, just make sure you remember to use the same when accessing it on the frontend
+    
+    res.json({ fileUrl: req.file.path });
+  });
 
 module.exports = router;

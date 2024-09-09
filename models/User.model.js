@@ -25,7 +25,17 @@ const userSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Game"
     }],
-    isPublisher: Boolean
+    isPublisher: Boolean,
+    profileImg: { 
+      type: String,
+      required: true,
+      default: "https://res.cloudinary.com/daa7dmuxv/image/upload/v1725871121/profile-image_lqsgmg.jpg",
+    },
+    bannerImg: { 
+      type: String,
+      required: true,
+      default: "https://res.cloudinary.com/daa7dmuxv/image/upload/v1725870978/profile-banner_xbgjnq.webp",
+    }
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`
