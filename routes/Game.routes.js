@@ -13,12 +13,22 @@ const fileUploader = require("../config/cloudinary.config");
 // CREATE a new game
 
 router.post("/games", isAuthenticated, (req, res, next) => {
-    Game.create(req.body)
+    const publisherNames = req.body.publishers;
+
+    User.find({ name: { $in: publisherNames } }) 
+        .then(publishers => {
+            if (publishers.length !== publisherNames.length) {
+                throw new Error("Some publishers not found");
+            }
+
+            const publisherIds = publishers.map(publisher => publisher._id);
+
+            return Game.create({ ...req.body, publishers: publisherIds });
+        })
         .then(game => {
-            return User.findByIdAndUpdate(
-                req.body.publishers,
-                { $push: { games: game._id } },
-                { new: true, useFindAndModify: false }
+            return User.updateMany(
+                { _id: { $in: game.publishers } },
+                { $push: { games: game._id } }
             ).then(() => {
                 res.status(201).json(game);
             });
