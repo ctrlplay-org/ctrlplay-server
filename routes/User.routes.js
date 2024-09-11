@@ -13,46 +13,89 @@ router.get("/users/:userId", (req, res, next) => {
         .catch(error => next(error));
 });
 
+//UPDATE played list with new game
 router.put("/users/:userId/played", (req, res, next) => {
     const { userId } = req.params;
     const { gameId } = req.body;
-
+  
     User.findById(userId)
-        .then(user => {
-            if (!user) return res.status(404).json({ message: "User not found." });
+      .then((user) => {
+        if (!user) return res.status(404).json({ message: "User not found." });
+  
+        if (user.played.includes(gameId)) {
+          return res.status(400).json({ message: "Game already added to played list." });
+        }
+  
+        user.played.push(gameId);
 
-            if (user.played.includes(gameId)) {
-                return res.status(400).json({ message: "Game already added to played list." });
-            }
+        user.wishlist = user.wishlist.filter((id) => id.toString() !== gameId);
+  
+        return user.save();
+      })
+      .then((updatedUser) => res.json(updatedUser))
+      .catch((error) => next(error));
+  });
 
-            user.played.push(gameId);
-            return user.save();
-        })
-        .then(updatedUser => res.json(updatedUser))
-        .catch(error => next(error));
-});
-
+// UPDATE wishlist with new game
 router.put("/users/:userId/wishlist", (req, res, next) => {
     const { userId } = req.params;
     const { gameId } = req.body;
-
+  
     User.findById(userId)
-        .then(user => {
-            if (!user) return res.status(404).json({ message: "User not found." });
+      .then((user) => {
+        if (!user) return res.status(404).json({ message: "User not found." });
+  
+        if (user.played.includes(gameId)) {
+          return res.status(400).json({ message: "Game already in played list, cannot add to wishlist." });
+        }
+  
+        if (user.wishlist.includes(gameId)) {
+          return res.status(400).json({ message: "Game already in wishlist." });
+        }
+  
+        user.wishlist.push(gameId);
+  
+        return user.save();
+      })
+      .then((updatedUser) => res.json(updatedUser))
+      .catch((error) => next(error));
+  });
 
-            if (user.wishlist.includes(gameId)) {
-                return res.status(400).json({ message: "Game already in wishlist." });
+// DELETE from played list
+router.delete("/users/:userId/played/:gameId", (req, res, next) => {
+    const { userId, gameId } = req.params;
+
+    User.findByIdAndUpdate(
+        userId,
+        { $pull: { played: gameId } }, // $pull removes the gameId from the played array
+        { new: true } // Returns the updated document
+    )
+        .then((updatedUser) => {
+            if (!updatedUser) {
+                return res.status(404).json({ message: "User not found." });
             }
-
-            user.wishlist.push(gameId);
-            return user.save();
+            res.json(updatedUser);
         })
-        .then(updatedUser => res.json(updatedUser))
-        .catch(error => next(error));
+        .catch((error) => next(error));
 });
 
+// DELETE from wishlist
+router.delete("/users/:userId/wishlist/:gameId", (req, res, next) => {
+    const { userId, gameId } = req.params;
 
-  
+    User.findByIdAndUpdate(
+        userId,
+        { $pull: { wishlist: gameId } }, 
+        { new: true } 
+    )
+        .then((updatedUser) => {
+            if (!updatedUser) {
+                return res.status(404).json({ message: "User not found." });
+            }
+            res.json(updatedUser);
+        })
+        .catch((error) => next(error));
+});
 
 
 router.get('/search/suggestions', async (req, res, next) => {
@@ -60,7 +103,7 @@ router.get('/search/suggestions', async (req, res, next) => {
 
     try {
         // Find games and users that match the query
-        const games = await Game.find({ name: new RegExp(query, 'i') }).limit(10); 
+        const games = await Game.find({ name: new RegExp(query, 'i') }).limit(10);
         const users = await User.find({ name: new RegExp(query, 'i') }).limit(10);
 
         // Combine games and users into a single list of suggestions
