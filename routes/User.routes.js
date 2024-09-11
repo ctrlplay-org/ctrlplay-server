@@ -49,26 +49,31 @@ router.put("/users/:userId/wishlist", (req, res, next) => {
 });
 
 
-router.get('/search', async (req, res, next) => {
+  
+
+
+router.get('/search/suggestions', async (req, res, next) => {
     const { query } = req.query;
 
     try {
-        const game = await Game.findOne({ name: new RegExp(query, 'i') });
-        const user = await User.findOne({ name: new RegExp(query, 'i') });
+        // Find games and users that match the query
+        const games = await Game.find({ name: new RegExp(query, 'i') }).limit(10); 
+        const users = await User.find({ name: new RegExp(query, 'i') }).limit(10);
 
-        if (game) {
-            return res.json({ game });
-        }
+        // Combine games and users into a single list of suggestions
+        const suggestions = [
+            ...games.map(game => ({ type: 'game', ...game.toObject() })),
+            ...users.map(user => ({ type: 'user', ...user.toObject() }))
+        ];
 
-        if (user) {
-            return res.json({ user });
-        }
-
-        return res.status(404).json({ message: 'No user found' });
+        // Return combined list of suggestions
+        res.json(suggestions);
     } catch (error) {
         next(error);
     }
 });
+
+
 
 
 
