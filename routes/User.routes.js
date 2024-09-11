@@ -1,6 +1,7 @@
 const router = require('express').Router();
-
 const User = require('../models/User.model');
+const Game = require('../models/Game.model');
+const { isAuthenticated } = require('../middleware/jwt.middleware');
 
 router.get("/users/:userId", (req, res, next) => {
     const { userId } = req.params;
@@ -8,5 +9,28 @@ router.get("/users/:userId", (req, res, next) => {
         .then((user) => res.json(user))
         .catch(error => next(error));
 });
+
+router.get('/search', async (req, res, next) => {
+    const { query } = req.query;
+
+    try {
+        const game = await Game.findOne({ name: new RegExp(query, 'i') });
+        const user = await User.findOne({ name: new RegExp(query, 'i') });
+
+        if (game) {
+            return res.json({ game });
+        }
+
+        if (user) {
+            return res.json({ user });
+        }
+
+        return res.status(404).json({ message: 'Aucun jeu ou utilisateur trouvé.' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+  
 
 module.exports = router;
