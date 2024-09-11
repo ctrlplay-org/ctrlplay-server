@@ -6,6 +6,9 @@ const { isAuthenticated } = require('../middleware/jwt.middleware');
 router.get("/users/:userId", (req, res, next) => {
     const { userId } = req.params;
     User.findById(userId)
+        .populate("games")
+        .populate("played")
+        .populate("wishlist")
         .then((user) => res.json(user))
         .catch(error => next(error));
 });
