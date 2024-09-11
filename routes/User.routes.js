@@ -10,6 +10,45 @@ router.get("/users/:userId", (req, res, next) => {
         .catch(error => next(error));
 });
 
+router.put("/users/:userId/played", (req, res, next) => {
+    const { userId } = req.params;
+    const { gameId } = req.body;
+
+    User.findById(userId)
+        .then(user => {
+            if (!user) return res.status(404).json({ message: "User not found." });
+
+            if (user.played.includes(gameId)) {
+                return res.status(400).json({ message: "Game already added to played list." });
+            }
+
+            user.played.push(gameId);
+            return user.save();
+        })
+        .then(updatedUser => res.json(updatedUser))
+        .catch(error => next(error));
+});
+
+router.put("/users/:userId/wishlist", (req, res, next) => {
+    const { userId } = req.params;
+    const { gameId } = req.body;
+
+    User.findById(userId)
+        .then(user => {
+            if (!user) return res.status(404).json({ message: "User not found." });
+
+            if (user.wishlist.includes(gameId)) {
+                return res.status(400).json({ message: "Game already in wishlist." });
+            }
+
+            user.wishlist.push(gameId);
+            return user.save();
+        })
+        .then(updatedUser => res.json(updatedUser))
+        .catch(error => next(error));
+});
+
+
 router.get('/search', async (req, res, next) => {
     const { query } = req.query;
 
@@ -31,6 +70,6 @@ router.get('/search', async (req, res, next) => {
     }
 });
 
-  
+
 
 module.exports = router;
