@@ -25,7 +25,7 @@ router.get('/search', async (req, res, next) => {
             return res.json({ user });
         }
 
-        return res.status(404).json({ message: 'Aucun jeu ou utilisateur trouvé.' });
+        return res.status(404).json({ message: 'No user found' });
     } catch (error) {
         next(error);
     }
