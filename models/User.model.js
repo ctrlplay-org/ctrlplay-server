@@ -19,8 +19,14 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Name is required."],
     },
-    played: Array,
-    wishlist: Array,
+    played: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Game"
+    }],
+    wishlist: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Game"
+    }],
     games: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Game"
