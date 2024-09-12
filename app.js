@@ -29,7 +29,7 @@ require("./config")(app);
 app.use("/api", indexRoutes);
 app.use("/api", gameRoutes);
 app.use("/api", reviewRoutes);
-app.use("/api", isAuthenticated, userRoutes);
+app.use("/api", userRoutes);
 app.use("/auth", authRoutes);
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes

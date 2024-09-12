@@ -14,7 +14,7 @@ router.get("/users/:userId", (req, res, next) => {
 });
 
 //UPDATE played list with new game
-router.put("/users/:userId/played", (req, res, next) => {
+router.put("/users/:userId/played", isAuthenticated, (req, res, next) => {
     const { userId } = req.params;
     const { gameId } = req.body;
 
@@ -37,7 +37,7 @@ router.put("/users/:userId/played", (req, res, next) => {
 });
 
 // UPDATE wishlist with new game
-router.put("/users/:userId/wishlist", (req, res, next) => {
+router.put("/users/:userId/wishlist", isAuthenticated, (req, res, next) => {
     const { userId } = req.params;
     const { gameId } = req.body;
 
@@ -62,7 +62,7 @@ router.put("/users/:userId/wishlist", (req, res, next) => {
 });
 
 // UPDATE profile banner
-router.put("/users/:userId/banner", (req, res, next) => {
+router.put("/users/:userId/banner", isAuthenticated, (req, res, next) => {
     const { userId } = req.params;
     const { bannerUrl } = req.body;
 
@@ -101,7 +101,7 @@ router.put("/users/:userId/profile-picture", isAuthenticated, async (req, res, n
 });
 
 // DELETE from played list
-router.delete("/users/:userId/played/:gameId", (req, res, next) => {
+router.delete("/users/:userId/played/:gameId", isAuthenticated, (req, res, next) => {
     const { userId, gameId } = req.params;
 
     User.findByIdAndUpdate(
@@ -119,7 +119,7 @@ router.delete("/users/:userId/played/:gameId", (req, res, next) => {
 });
 
 // DELETE from wishlist
-router.delete("/users/:userId/wishlist/:gameId", (req, res, next) => {
+router.delete("/users/:userId/wishlist/:gameId", isAuthenticated, (req, res, next) => {
     const { userId, gameId } = req.params;
 
     User.findByIdAndUpdate(
