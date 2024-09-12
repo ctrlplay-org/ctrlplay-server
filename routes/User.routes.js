@@ -17,49 +17,88 @@ router.get("/users/:userId", (req, res, next) => {
 router.put("/users/:userId/played", (req, res, next) => {
     const { userId } = req.params;
     const { gameId } = req.body;
-  
-    User.findById(userId)
-      .then((user) => {
-        if (!user) return res.status(404).json({ message: "User not found." });
-  
-        if (user.played.includes(gameId)) {
-          return res.status(400).json({ message: "Game already added to played list." });
-        }
-  
-        user.played.push(gameId);
 
-        user.wishlist = user.wishlist.filter((id) => id.toString() !== gameId);
-  
-        return user.save();
-      })
-      .then((updatedUser) => res.json(updatedUser))
-      .catch((error) => next(error));
-  });
+    User.findById(userId)
+        .then((user) => {
+            if (!user) return res.status(404).json({ message: "User not found." });
+
+            if (user.played.includes(gameId)) {
+                return res.status(400).json({ message: "Game already added to played list." });
+            }
+
+            user.played.push(gameId);
+
+            user.wishlist = user.wishlist.filter((id) => id.toString() !== gameId);
+
+            return user.save();
+        })
+        .then((updatedUser) => res.json(updatedUser))
+        .catch((error) => next(error));
+});
 
 // UPDATE wishlist with new game
 router.put("/users/:userId/wishlist", (req, res, next) => {
     const { userId } = req.params;
     const { gameId } = req.body;
-  
+
     User.findById(userId)
-      .then((user) => {
+        .then((user) => {
+            if (!user) return res.status(404).json({ message: "User not found." });
+
+            if (user.played.includes(gameId)) {
+                return res.status(400).json({ message: "Game already in played list, cannot add to wishlist." });
+            }
+
+            if (user.wishlist.includes(gameId)) {
+                return res.status(400).json({ message: "Game already in wishlist." });
+            }
+
+            user.wishlist.push(gameId);
+
+            return user.save();
+        })
+        .then((updatedUser) => res.json(updatedUser))
+        .catch((error) => next(error));
+});
+
+// UPDATE profile banner
+router.put("/users/:userId/banner", (req, res, next) => {
+    const { userId } = req.params;
+    const { bannerUrl } = req.body;
+
+    User.findById(userId)
+        .then((user) => {
+            if (!user) return res.status(404).json({ message: "User not found." });
+
+            user.bannerImg = bannerUrl;
+
+            return user.save();
+        })
+        .then((updatedUser) => res.json(updatedUser))
+        .catch((error) => next(error));
+});
+
+// UPDATE profile picture
+router.put("/users/:userId/profile-picture", isAuthenticated, async (req, res, next) => {
+    const { userId } = req.params;
+    const { profileImgUrl } = req.body;
+
+    if (!profileImgUrl) {
+        return res.status(400).json({ message: "Profile image URL is required." });
+    }
+
+    try {
+        const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: "User not found." });
-  
-        if (user.played.includes(gameId)) {
-          return res.status(400).json({ message: "Game already in played list, cannot add to wishlist." });
-        }
-  
-        if (user.wishlist.includes(gameId)) {
-          return res.status(400).json({ message: "Game already in wishlist." });
-        }
-  
-        user.wishlist.push(gameId);
-  
-        return user.save();
-      })
-      .then((updatedUser) => res.json(updatedUser))
-      .catch((error) => next(error));
-  });
+
+        user.profileImg = profileImgUrl;
+        const updatedUser = await user.save();
+
+        res.json(updatedUser);
+    } catch (error) {
+        next(error);
+    }
+});
 
 // DELETE from played list
 router.delete("/users/:userId/played/:gameId", (req, res, next) => {
@@ -85,8 +124,8 @@ router.delete("/users/:userId/wishlist/:gameId", (req, res, next) => {
 
     User.findByIdAndUpdate(
         userId,
-        { $pull: { wishlist: gameId } }, 
-        { new: true } 
+        { $pull: { wishlist: gameId } },
+        { new: true }
     )
         .then((updatedUser) => {
             if (!updatedUser) {
